@@ -160,6 +160,7 @@ _C.OPTIM.ADAM_BETA2 = 0.999
 # can be assigned a smaller lr than the new
 # classification layer
 _C.OPTIM.STAGED_LR = False
+_C.OPTIM.LAYER_DECAY = 1.0
 _C.OPTIM.NEW_LAYERS = ()
 _C.OPTIM.BASE_LR_MULT = 0.1
 # Learning rate scheduler

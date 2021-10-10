@@ -1,6 +1,7 @@
 """
 Modified from https://github.com/KaiyangZhou/deep-person-reid
 """
+import json
 import warnings
 import torch
 import torch.nn as nn
@@ -10,7 +11,7 @@ from .radam import RAdam
 AVAI_OPTIMS = ["adam", "amsgrad", "sgd", "rmsprop", "radam", "adamw"]
 
 
-def build_optimizer(model, optim_cfg):
+def build_optimizer(model, optim_cfg, assigner=None):
     """A function wrapper for building an optimizer.
 
     Args:
@@ -28,6 +29,7 @@ def build_optimizer(model, optim_cfg):
     adam_beta2 = optim_cfg.ADAM_BETA2
     staged_lr = optim_cfg.STAGED_LR
     new_layers = optim_cfg.NEW_LAYERS
+    layer_decay = optim_cfg.LAYER_DECAY
     base_lr_mult = optim_cfg.BASE_LR_MULT
 
     if optim not in AVAI_OPTIMS:
@@ -74,6 +76,54 @@ def build_optimizer(model, optim_cfg):
                 "params": new_params
             },
         ]
+
+    elif layer_decay != 1.0:
+        if not isinstance(model, nn.Module):
+            raise TypeError(
+                "When layer_decay is not 1.0, model given to "
+                "build_optimizer() must be an instance of nn.Module"
+            )
+
+        if isinstance(model, nn.DataParallel):
+            model = model.module
+
+        # the assigner has two function: one: name to layer_id; two: name to layer decay value
+        get_num_layer = assigner.get_layer_id
+        get_layer_scale=assigner.get_scale
+
+        parameter_group_names = {}
+        parameter_group_vars = {}
+        for name, param in model.named_parameters():
+            if not param.requires_grad:
+                continue  # frozen weights
+            if len(param.shape) == 1 or name.endswith(".bias"):
+                group_name = "no_decay"
+                this_weight_decay = 0.
+            else:
+                group_name = "decay"
+                this_weight_decay = weight_decay
+                
+            layer_id = get_num_layer(name)
+            group_name = "layer_decay_%d_%s" % (layer_id, group_name)
+
+            if group_name not in parameter_group_names:
+                scale = get_layer_scale(layer_id)
+                parameter_group_names[group_name] = {
+                    "weight_decay": this_weight_decay,
+                    "params": [],
+                    "lr_scale": scale,
+                    # "lr": scale * lr
+                }
+                parameter_group_vars[group_name] = {
+                    "weight_decay": this_weight_decay,
+                    "params": [],
+                    "lr_scale": scale,
+                    # "lr": scale * lr
+                }
+            parameter_group_vars[group_name]["params"].append(param)
+            parameter_group_names[group_name]["params"].append(name)
+        print("Param groups = %s" % json.dumps(parameter_group_names, indent=2))
+        param_groups = list(parameter_group_vars.values())
 
     else:
         if isinstance(model, nn.Module):

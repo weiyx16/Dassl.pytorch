@@ -19,11 +19,7 @@ class Datum:
         classname (str): class name.
     """
 
-<<<<<<< HEAD
     def __init__(self, impath='', label=0, domain=0, classname='', no_file_checking=False):
-=======
-    def __init__(self, impath="", label=0, domain=0, classname=""):
->>>>>>> e3a15daefc1b2f85bf209869aa966b23c1211890
         assert isinstance(impath, str)
         if not no_file_checking:
             assert check_isfile(impath)
