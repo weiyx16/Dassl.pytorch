@@ -5,8 +5,8 @@ from .build import BACKBONE_REGISTRY
 from .backbone import Backbone
 
 model_urls = {
-    'mobilenet_v2':
-    'https://download.pytorch.org/models/mobilenet_v2-b0353104.pth',
+    "mobilenet_v2":
+    "https://download.pytorch.org/models/mobilenet_v2-b0353104.pth",
 }
 
 
@@ -44,8 +44,10 @@ class ConvBNReLU(nn.Sequential):
                 stride,
                 padding,
                 groups=groups,
-                bias=False
-            ), nn.BatchNorm2d(out_planes), nn.ReLU6(inplace=True)
+                bias=False,
+            ),
+            nn.BatchNorm2d(out_planes),
+            nn.ReLU6(inplace=True),
         )
 
 
@@ -90,7 +92,7 @@ class MobileNetV2(Backbone):
         width_mult=1.0,
         inverted_residual_setting=None,
         round_nearest=8,
-        block=None
+        block=None,
     ):
         """
         MobileNet V2.
@@ -122,8 +124,10 @@ class MobileNetV2(Backbone):
             ]
 
         # only check the first element, assuming user knows t,c,n,s are required
-        if len(inverted_residual_setting
-               ) == 0 or len(inverted_residual_setting[0]) != 4:
+        if (
+            len(inverted_residual_setting) == 0
+            or len(inverted_residual_setting[0]) != 4
+        ):
             raise ValueError(
                 "inverted_residual_setting should be non-empty "
                 "or a 4-element list, got {}".
@@ -161,7 +165,7 @@ class MobileNetV2(Backbone):
         # weight initialization
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out")
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
             elif isinstance(m, nn.BatchNorm2d):
@@ -184,13 +188,14 @@ class MobileNetV2(Backbone):
 
 def init_pretrained_weights(model, model_url):
     """Initializes model with pretrained weights.
-    
+
     Layers that don't match with pretrained layers in name or size are kept unchanged.
     """
     if model_url is None:
         import warnings
+
         warnings.warn(
-            'ImageNet pretrained weights are unavailable for this model'
+            "ImageNet pretrained weights are unavailable for this model"
         )
         return
     pretrain_dict = model_zoo.load_url(model_url)
@@ -208,5 +213,5 @@ def init_pretrained_weights(model, model_url):
 def mobilenetv2(pretrained=True, **kwargs):
     model = MobileNetV2(**kwargs)
     if pretrained:
-        init_pretrained_weights(model, model_urls['mobilenet_v2'])
+        init_pretrained_weights(model, model_urls["mobilenet_v2"])
     return model

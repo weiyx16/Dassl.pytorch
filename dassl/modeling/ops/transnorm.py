@@ -25,10 +25,10 @@ class _TransNorm(nn.Module):
         self.momentum = momentum
         self.adaptive_alpha = adaptive_alpha
 
-        self.register_buffer('running_mean_s', torch.zeros(num_features))
-        self.register_buffer('running_var_s', torch.ones(num_features))
-        self.register_buffer('running_mean_t', torch.zeros(num_features))
-        self.register_buffer('running_var_t', torch.ones(num_features))
+        self.register_buffer("running_mean_s", torch.zeros(num_features))
+        self.register_buffer("running_var_s", torch.ones(num_features))
+        self.register_buffer("running_mean_t", torch.zeros(num_features))
+        self.register_buffer("running_var_t", torch.ones(num_features))
 
         self.weight = nn.Parameter(torch.ones(num_features))
         self.bias = nn.Parameter(torch.zeros(num_features))
@@ -123,8 +123,8 @@ class TransNorm1d(_TransNorm):
     def _check_input(self, x):
         if x.dim() != 2:
             raise ValueError(
-                'Expected the input to be 2-D, '
-                'but got {}-D'.format(x.dim())
+                "Expected the input to be 2-D, "
+                "but got {}-D".format(x.dim())
             )
 
 
@@ -133,6 +133,6 @@ class TransNorm2d(_TransNorm):
     def _check_input(self, x):
         if x.dim() != 4:
             raise ValueError(
-                'Expected the input to be 4-D, '
-                'but got {}-D'.format(x.dim())
+                "Expected the input to be 4-D, "
+                "but got {}-D".format(x.dim())
             )

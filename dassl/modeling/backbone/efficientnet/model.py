@@ -30,11 +30,13 @@ class MBConvBlock(nn.Module):
         self._bn_eps = global_params.batch_norm_epsilon
         self.has_se = (self._block_args.se_ratio is
                        not None) and (0 < self._block_args.se_ratio <= 1)
-        self.id_skip = block_args.id_skip # skip connection and drop connect
+        self.id_skip = block_args.id_skip  # skip connection and drop connect
 
         # Expansion phase
-        inp = self._block_args.input_filters # number of input channels
-        oup = self._block_args.input_filters * self._block_args.expand_ratio # number of output channels
+        inp = self._block_args.input_filters  # number of input channels
+        oup = (
+            self._block_args.input_filters * self._block_args.expand_ratio
+        )  # number of output channels
         if self._block_args.expand_ratio != 1:
             Conv2d = get_same_padding_conv2d(image_size=image_size)
             self._expand_conv = Conv2d(
@@ -52,10 +54,10 @@ class MBConvBlock(nn.Module):
         self._depthwise_conv = Conv2d(
             in_channels=oup,
             out_channels=oup,
-            groups=oup, # groups makes it depthwise
+            groups=oup,  # groups makes it depthwise
             kernel_size=k,
             stride=s,
-            bias=False
+            bias=False,
         )
         self._bn1 = nn.BatchNorm2d(
             num_features=oup, momentum=self._bn_mom, eps=self._bn_eps
@@ -117,13 +119,19 @@ class MBConvBlock(nn.Module):
         x = self._bn2(self._project_conv(x))
 
         # Skip connection and drop connect
-        input_filters, output_filters = self._block_args.input_filters, self._block_args.output_filters
-        if self.id_skip and self._block_args.stride == 1 and input_filters == output_filters:
+        input_filters, output_filters = (
+            self._block_args.input_filters,
+            self._block_args.output_filters,
+        )
+        if (
+            self.id_skip and self._block_args.stride == 1
+            and input_filters == output_filters
+        ):
             if drop_connect_rate:
                 x = drop_connect(
                     x, p=drop_connect_rate, training=self.training
                 )
-            x = x + inputs # skip connection
+            x = x + inputs  # skip connection
         return x
 
     def set_swish(self, memory_efficient=True):
@@ -146,8 +154,8 @@ class EfficientNet(Backbone):
 
     def __init__(self, blocks_args=None, global_params=None):
         super().__init__()
-        assert isinstance(blocks_args, list), 'blocks_args should be a list'
-        assert len(blocks_args) > 0, 'block args must be greater than 0'
+        assert isinstance(blocks_args, list), "blocks_args should be a list"
+        assert len(blocks_args) > 0, "block args must be greater than 0"
         self._global_params = global_params
         self._blocks_args = blocks_args
 
@@ -160,10 +168,10 @@ class EfficientNet(Backbone):
         Conv2d = get_same_padding_conv2d(image_size=global_params.image_size)
 
         # Stem
-        in_channels = 3 # rgb
+        in_channels = 3  # rgb
         out_channels = round_filters(
             32, self._global_params
-        ) # number of output channels
+        )  # number of output channels
         self._conv_stem = Conv2d(
             in_channels, out_channels, kernel_size=3, stride=2, bias=False
         )
@@ -186,7 +194,7 @@ class EfficientNet(Backbone):
                 ),
                 num_repeat=round_repeats(
                     block_args.num_repeat, self._global_params
-                )
+                ),
             )
 
             # The first block needs to take care of stride and filter size increase.
@@ -211,7 +219,7 @@ class EfficientNet(Backbone):
                 # image_size = calculate_output_image_size(image_size, block_args.stride) # ?
 
         # Head
-        in_channels = block_args.output_filters # output of final block
+        in_channels = block_args.output_filters  # output of final block
         out_channels = round_filters(1280, self._global_params)
         Conv2d = get_same_padding_conv2d(image_size=image_size)
         self._conv_head = Conv2d(
@@ -236,7 +244,7 @@ class EfficientNet(Backbone):
             block.set_swish(memory_efficient)
 
     def extract_features(self, inputs):
-        """ Returns output of the final convolution layer """
+        """Returns output of the final convolution layer"""
 
         # Stem
         x = self._swish(self._bn0(self._conv_stem(inputs)))
@@ -282,7 +290,7 @@ class EfficientNet(Backbone):
         cls, model_name, advprop=False, num_classes=1000, in_channels=3
     ):
         model = cls.from_name(
-            model_name, override_params={'num_classes': num_classes}
+            model_name, override_params={"num_classes": num_classes}
         )
         load_pretrained_weights(
             model, model_name, load_fc=(num_classes == 1000), advprop=advprop
@@ -298,11 +306,11 @@ class EfficientNet(Backbone):
 
     @classmethod
     def _check_model_name_is_valid(cls, model_name):
-        """ Validates model name. """
-        valid_models = ['efficientnet-b' + str(i) for i in range(9)]
+        """Validates model name."""
+        valid_models = ["efficientnet-b" + str(i) for i in range(9)]
         if model_name not in valid_models:
             raise ValueError(
-                'model_name should be one of: ' + ', '.join(valid_models)
+                "model_name should be one of: " + ", ".join(valid_models)
             )
 
     def _change_in_channels(model, in_channels):
@@ -318,46 +326,46 @@ class EfficientNet(Backbone):
 
 def build_efficientnet(name, pretrained):
     if pretrained:
-        return EfficientNet.from_pretrained('efficientnet-{}'.format(name))
+        return EfficientNet.from_pretrained("efficientnet-{}".format(name))
     else:
-        return EfficientNet.from_name('efficientnet-{}'.format(name))
+        return EfficientNet.from_name("efficientnet-{}".format(name))
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b0(pretrained=True, **kwargs):
-    return build_efficientnet('b0', pretrained)
+    return build_efficientnet("b0", pretrained)
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b1(pretrained=True, **kwargs):
-    return build_efficientnet('b1', pretrained)
+    return build_efficientnet("b1", pretrained)
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b2(pretrained=True, **kwargs):
-    return build_efficientnet('b2', pretrained)
+    return build_efficientnet("b2", pretrained)
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b3(pretrained=True, **kwargs):
-    return build_efficientnet('b3', pretrained)
+    return build_efficientnet("b3", pretrained)
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b4(pretrained=True, **kwargs):
-    return build_efficientnet('b4', pretrained)
+    return build_efficientnet("b4", pretrained)
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b5(pretrained=True, **kwargs):
-    return build_efficientnet('b5', pretrained)
+    return build_efficientnet("b5", pretrained)
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b6(pretrained=True, **kwargs):
-    return build_efficientnet('b6', pretrained)
+    return build_efficientnet("b6", pretrained)
 
 
 @BACKBONE_REGISTRY.register()
 def efficientnet_b7(pretrained=True, **kwargs):
-    return build_efficientnet('b7', pretrained)
+    return build_efficientnet("b7", pretrained)

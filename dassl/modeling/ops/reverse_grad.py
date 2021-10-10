@@ -26,8 +26,9 @@ class ReverseGrad(nn.Module):
     the backward.
     """
 
-    def forward(self, x, grad_scaling=1.):
-        assert grad_scaling >= 0, \
-            'grad_scaling must be non-negative, ' \
-            'but got {}'.format(grad_scaling)
+    def forward(self, x, grad_scaling=1.0):
+        assert (grad_scaling >=
+                0), "grad_scaling must be non-negative, " "but got {}".format(
+                    grad_scaling
+                )
         return reverse_grad(x, grad_scaling)

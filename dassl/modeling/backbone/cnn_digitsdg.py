@@ -31,9 +31,9 @@ class ConvNet(Backbone):
 
     def _check_input(self, x):
         H, W = x.shape[2:]
-        assert H == 32 and W == 32, \
-            'Input to network must be 32x32, ' \
-            'but got {}x{}'.format(H, W)
+        assert (
+            H == 32 and W == 32
+        ), "Input to network must be 32x32, " "but got {}x{}".format(H, W)
 
     def forward(self, x):
         self._check_input(x)
@@ -57,5 +57,5 @@ def cnn_digitsdg(**kwargs):
         for Domain Generalisation. AAAI 2020.
     """
     model = ConvNet(c_hidden=64)
-    init_network_weights(model, init_type='kaiming')
+    init_network_weights(model, init_type="kaiming")
     return model

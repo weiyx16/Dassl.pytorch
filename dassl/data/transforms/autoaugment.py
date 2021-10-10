@@ -46,7 +46,7 @@ class ImageNetPolicy:
             SubPolicy(0.6, "solarize", 5, 0.6, "autocontrast", 5, fillcolor),
             SubPolicy(0.6, "invert", 4, 1.0, "equalize", 8, fillcolor),
             SubPolicy(0.6, "color", 4, 1.0, "contrast", 8, fillcolor),
-            SubPolicy(0.8, "equalize", 8, 0.6, "equalize", 3, fillcolor)
+            SubPolicy(0.8, "equalize", 8, 0.6, "equalize", 3, fillcolor),
         ]
 
     def __call__(self, img):
@@ -97,7 +97,7 @@ class CIFAR10Policy:
             SubPolicy(0.9, "translateY", 9, 0.7, "translateY", 9, fillcolor),
             SubPolicy(0.9, "autocontrast", 2, 0.8, "solarize", 3, fillcolor),
             SubPolicy(0.8, "equalize", 8, 0.1, "invert", 3, fillcolor),
-            SubPolicy(0.7, "translateY", 9, 0.9, "autocontrast", 1, fillcolor)
+            SubPolicy(0.7, "translateY", 9, 0.9, "autocontrast", 1, fillcolor),
         ]
 
     def __call__(self, img):
@@ -148,7 +148,7 @@ class SVHNPolicy:
             SubPolicy(0.8, "shearY", 4, 0.8, "invert", 8, fillcolor),
             SubPolicy(0.7, "shearX", 9, 0.8, "translateY", 3, fillcolor),
             SubPolicy(0.8, "shearY", 5, 0.7, "autocontrast", 3, fillcolor),
-            SubPolicy(0.7, "shearX", 2, 0.1, "invert", 5, fillcolor)
+            SubPolicy(0.7, "shearX", 2, 0.1, "invert", 5, fillcolor),
         ]
 
     def __call__(self, img):
@@ -169,7 +169,7 @@ class SubPolicy(object):
         p2,
         operation2,
         magnitude_idx2,
-        fillcolor=(128, 128, 128)
+        fillcolor=(128, 128, 128),
     ):
         ranges = {
             "shearX": np.linspace(0, 0.3, 10),
@@ -185,7 +185,7 @@ class SubPolicy(object):
             "brightness": np.linspace(0.0, 0.9, 10),
             "autocontrast": [0] * 10,
             "equalize": [0] * 10,
-            "invert": [0] * 10
+            "invert": [0] * 10,
         }
 
         # from https://stackoverflow.com/questions/5252170/specify-image-filling-color-when-rotating-in-python-with-pil-and-setting-expand
@@ -202,7 +202,7 @@ class SubPolicy(object):
                 Image.AFFINE,
                 (1, magnitude * random.choice([-1, 1]), 0, 0, 1, 0),
                 Image.BICUBIC,
-                fillcolor=fillcolor
+                fillcolor=fillcolor,
             ),
             "shearY":
             lambda img, magnitude: img.transform(
@@ -210,25 +210,27 @@ class SubPolicy(object):
                 Image.AFFINE,
                 (1, 0, 0, magnitude * random.choice([-1, 1]), 1, 0),
                 Image.BICUBIC,
-                fillcolor=fillcolor
+                fillcolor=fillcolor,
             ),
             "translateX":
             lambda img, magnitude: img.transform(
                 img.size,
-                Image.AFFINE, (
+                Image.AFFINE,
+                (
                     1, 0, magnitude * img.size[0] * random.choice([-1, 1]), 0,
                     1, 0
                 ),
-                fillcolor=fillcolor
+                fillcolor=fillcolor,
             ),
             "translateY":
             lambda img, magnitude: img.transform(
                 img.size,
-                Image.AFFINE, (
+                Image.AFFINE,
+                (
                     1, 0, 0, 0, 1, magnitude * img.size[1] * random.
                     choice([-1, 1])
                 ),
-                fillcolor=fillcolor
+                fillcolor=fillcolor,
             ),
             "rotate":
             lambda img, magnitude: rotate_with_fill(img, magnitude),
@@ -253,7 +255,7 @@ class SubPolicy(object):
             "equalize":
             lambda img, magnitude: ImageOps.equalize(img),
             "invert":
-            lambda img, magnitude: ImageOps.invert(img)
+            lambda img, magnitude: ImageOps.invert(img),
         }
 
         self.p1 = p1

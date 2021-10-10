@@ -34,15 +34,17 @@ class BasicBlock(nn.Module):
             bias=False
         )
         self.droprate = dropRate
-        self.equalInOut = (in_planes == out_planes)
-        self.convShortcut = (not self.equalInOut) and nn.Conv2d(
-            in_planes,
-            out_planes,
-            kernel_size=1,
-            stride=stride,
-            padding=0,
-            bias=False
-        ) or None
+        self.equalInOut = in_planes == out_planes
+        self.convShortcut = (
+            (not self.equalInOut) and nn.Conv2d(
+                in_planes,
+                out_planes,
+                kernel_size=1,
+                stride=stride,
+                padding=0,
+                bias=False,
+            ) or None
+        )
 
     def forward(self, x):
         if not self.equalInOut:
@@ -73,8 +75,10 @@ class NetworkBlock(nn.Module):
         for i in range(int(nb_layers)):
             layers.append(
                 block(
-                    i == 0 and in_planes or out_planes, out_planes,
-                    i == 0 and stride or 1, dropRate
+                    i == 0 and in_planes or out_planes,
+                    out_planes,
+                    i == 0 and stride or 1,
+                    dropRate,
                 )
             )
         return nn.Sequential(*layers)
@@ -90,7 +94,7 @@ class WideResNet(Backbone):
         nChannels = [
             16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor
         ]
-        assert ((depth-4) % 6 == 0)
+        assert (depth-4) % 6 == 0
         n = (depth-4) / 6
         block = BasicBlock
         # 1st conv before any network block
@@ -118,7 +122,7 @@ class WideResNet(Backbone):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(
-                    m.weight, mode='fan_out', nonlinearity='relu'
+                    m.weight, mode="fan_out", nonlinearity="relu"
                 )
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)

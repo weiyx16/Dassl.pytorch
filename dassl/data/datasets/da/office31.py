@@ -20,8 +20,9 @@ class Office31(DatasetBase):
         - Saenko et al. Adapting visual category models to
         new domains. ECCV 2010.
     """
-    dataset_dir = 'office31'
-    domains = ['amazon', 'webcam', 'dslr']
+
+    dataset_dir = "office31"
+    domains = ["amazon", "webcam", "dslr"]
 
     def __init__(self, cfg):
         root = osp.abspath(osp.expanduser(cfg.DATASET.ROOT))

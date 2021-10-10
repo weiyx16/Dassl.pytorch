@@ -19,7 +19,11 @@ class Datum:
         classname (str): class name.
     """
 
+<<<<<<< HEAD
     def __init__(self, impath='', label=0, domain=0, classname='', no_file_checking=False):
+=======
+    def __init__(self, impath="", label=0, domain=0, classname=""):
+>>>>>>> e3a15daefc1b2f85bf209869aa966b23c1211890
         assert isinstance(impath, str)
         if not no_file_checking:
             assert check_isfile(impath)
@@ -52,14 +56,15 @@ class DatasetBase:
     2) domain generalization
     3) semi-supervised learning
     """
-    dataset_dir = '' # the directory where the dataset is stored
-    domains = [] # string names of all domains
+
+    dataset_dir = ""  # the directory where the dataset is stored
+    domains = []  # string names of all domains
 
     def __init__(self, train_x=None, train_u=None, val=None, test=None):
-        self._train_x = train_x # labeled training data
-        self._train_u = train_u # unlabeled training data (optional)
-        self._val = val # validation data (optional)
-        self._test = test # test data
+        self._train_x = train_x  # labeled training data
+        self._train_u = train_u  # unlabeled training data (optional)
+        self._val = val  # validation data (optional)
+        self._test = test  # test data
 
         self._num_classes = self.get_num_classes(train_x)
         self._lab2cname, self._classnames = self.get_lab2cname(train_x)
@@ -126,8 +131,8 @@ class DatasetBase:
         for domain in input_domains:
             if domain not in self.domains:
                 raise ValueError(
-                    'Input domain must belong to {}, '
-                    'but got [{}]'.format(self.domains, domain)
+                    "Input domain must belong to {}, "
+                    "but got [{}]".format(self.domains, domain)
                 )
 
     def download_data(self, url, dst, from_gdrive=True):
@@ -139,21 +144,21 @@ class DatasetBase:
         else:
             raise NotImplementedError
 
-        print('Extracting file ...')
+        print("Extracting file ...")
 
         try:
             tar = tarfile.open(dst)
             tar.extractall(path=osp.dirname(dst))
             tar.close()
         except:
-            zip_ref = zipfile.ZipFile(dst, 'r')
+            zip_ref = zipfile.ZipFile(dst, "r")
             zip_ref.extractall(osp.dirname(dst))
             zip_ref.close()
 
-        print('File extracted to {}'.format(osp.dirname(dst)))
+        print("File extracted to {}".format(osp.dirname(dst)))
 
     def generate_fewshot_dataset(
-        self, *data_sources, num_shots=-1, repeat=True
+        self, *data_sources, num_shots=-1, repeat=False
     ):
         """Generate a few-shot dataset (typically for the training set).
 
@@ -164,14 +169,14 @@ class DatasetBase:
         Args:
             data_sources: each individual is a list containing Datum objects.
             num_shots (int): number of instances per class to sample.
-            repeat (bool): repeat images if needed.
+            repeat (bool): repeat images if needed (default: False).
         """
         if num_shots < 1:
             if len(data_sources) == 1:
                 return data_sources[0]
             return data_sources
 
-        print(f'Creating a {num_shots}-shot dataset')
+        print(f"Creating a {num_shots}-shot dataset")
 
         output = []
 

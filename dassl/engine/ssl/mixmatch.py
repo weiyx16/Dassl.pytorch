@@ -56,7 +56,7 @@ class MixMatch(TrainerXU):
             label_x,
             label_xu[:num_x],
             self.beta,
-            preserve_order=True
+            preserve_order=True,
         )
 
         input_u, label_u = mixup(
@@ -65,7 +65,7 @@ class MixMatch(TrainerXU):
             label_u,
             label_xu[num_x:],
             self.beta,
-            preserve_order=True
+            preserve_order=True,
         )
 
         # Compute losses
@@ -78,7 +78,7 @@ class MixMatch(TrainerXU):
         loss = loss_x + loss_u*weight_u
         self.model_backward_and_update(loss)
 
-        loss_summary = {'loss_x': loss_x.item(), 'loss_u': loss_u.item()}
+        loss_summary = {"loss_x": loss_x.item(), "loss_u": loss_u.item()}
 
         if (self.batch_idx + 1) == self.num_batches:
             self.update_lr()
@@ -86,10 +86,10 @@ class MixMatch(TrainerXU):
         return loss_summary
 
     def parse_batch_train(self, batch_x, batch_u):
-        input_x = batch_x['img'][0]
-        label_x = batch_x['label']
+        input_x = batch_x["img"][0]
+        label_x = batch_x["label"]
         label_x = create_onehot(label_x, self.num_classes)
-        input_u = batch_u['img']
+        input_u = batch_u["img"]
 
         input_x = input_x.to(self.device)
         label_x = label_x.to(self.device)

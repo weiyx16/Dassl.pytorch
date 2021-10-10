@@ -29,9 +29,9 @@ class FeatureExtractor(Backbone):
 
     def _check_input(self, x):
         H, W = x.shape[2:]
-        assert H == 32 and W == 32, \
-            'Input to network must be 32x32, ' \
-            'but got {}x{}'.format(H, W)
+        assert (
+            H == 32 and W == 32
+        ), "Input to network must be 32x32, " "but got {}x{}".format(H, W)
 
     def forward(self, x):
         self._check_input(x)

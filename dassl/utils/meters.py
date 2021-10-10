@@ -1,7 +1,7 @@
 from collections import defaultdict
 import torch
 
-__all__ = ['AverageMeter', 'MetricMeter']
+__all__ = ["AverageMeter", "MetricMeter"]
 
 
 class AverageMeter:
@@ -55,7 +55,7 @@ class MetricMeter:
         >>> print(str(metric))
     """
 
-    def __init__(self, delimiter='\t'):
+    def __init__(self, delimiter="\t"):
         self.meters = defaultdict(AverageMeter)
         self.delimiter = delimiter
 
@@ -65,7 +65,7 @@ class MetricMeter:
 
         if not isinstance(input_dict, dict):
             raise TypeError(
-                'Input to MetricMeter.update() must be a dictionary'
+                "Input to MetricMeter.update() must be a dictionary"
             )
 
         for k, v in input_dict.items():
@@ -76,7 +76,5 @@ class MetricMeter:
     def __str__(self):
         output_str = []
         for name, meter in self.meters.items():
-            output_str.append(
-                '{} {:.4f} ({:.4f})'.format(name, meter.val, meter.avg)
-            )
+            output_str.append(f"{name} {meter.val:.4f} ({meter.avg:.4f})")
         return self.delimiter.join(output_str)

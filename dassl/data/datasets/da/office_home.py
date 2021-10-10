@@ -20,8 +20,9 @@ class OfficeHome(DatasetBase):
         - Venkateswara et al. Deep Hashing Network for Unsupervised
         Domain Adaptation. CVPR 2017.
     """
-    dataset_dir = 'office_home'
-    domains = ['art', 'clipart', 'product', 'real_world']
+
+    dataset_dir = "office_home"
+    domains = ["art", "clipart", "product", "real_world"]
 
     def __init__(self, cfg):
         root = osp.abspath(osp.expanduser(cfg.DATASET.ROOT))
@@ -55,7 +56,7 @@ class OfficeHome(DatasetBase):
                         impath=impath,
                         label=label,
                         domain=domain,
-                        classname=class_name.lower()
+                        classname=class_name.lower(),
                     )
                     items.append(item)
 

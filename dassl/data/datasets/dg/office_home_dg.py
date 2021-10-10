@@ -19,16 +19,17 @@ class OfficeHomeDG(DatasetBase):
         - Venkateswara et al. Deep Hashing Network for Unsupervised
         Domain Adaptation. CVPR 2017.
     """
-    dataset_dir = 'office_home_dg'
-    domains = ['art', 'clipart', 'product', 'real_world']
-    data_url = 'https://drive.google.com/uc?id=1gkbf_KaxoBws-GWT3XIPZ7BnkqbAxIFa'
+
+    dataset_dir = "office_home_dg"
+    domains = ["art", "clipart", "product", "real_world"]
+    data_url = "https://drive.google.com/uc?id=1gkbf_KaxoBws-GWT3XIPZ7BnkqbAxIFa"
 
     def __init__(self, cfg):
         root = osp.abspath(osp.expanduser(cfg.DATASET.ROOT))
         self.dataset_dir = osp.join(root, self.dataset_dir)
 
         if not osp.exists(self.dataset_dir):
-            dst = osp.join(root, 'office_home_dg.zip')
+            dst = osp.join(root, "office_home_dg.zip")
             self.download_data(self.data_url, dst, from_gdrive=True)
 
         self.check_input_domains(
@@ -36,13 +37,13 @@ class OfficeHomeDG(DatasetBase):
         )
 
         train = DigitsDG.read_data(
-            self.dataset_dir, cfg.DATASET.SOURCE_DOMAINS, 'train'
+            self.dataset_dir, cfg.DATASET.SOURCE_DOMAINS, "train"
         )
         val = DigitsDG.read_data(
-            self.dataset_dir, cfg.DATASET.SOURCE_DOMAINS, 'val'
+            self.dataset_dir, cfg.DATASET.SOURCE_DOMAINS, "val"
         )
         test = DigitsDG.read_data(
-            self.dataset_dir, cfg.DATASET.TARGET_DOMAINS, 'all'
+            self.dataset_dir, cfg.DATASET.TARGET_DOMAINS, "all"
         )
 
         super().__init__(train_x=train, val=val, test=test)

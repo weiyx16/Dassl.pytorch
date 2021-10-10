@@ -54,9 +54,9 @@ class SelfEnsembling(TrainerXU):
         ema_model_update(self.model, self.teacher, ema_alpha)
 
         loss_summary = {
-            'loss_x': loss_x.item(),
-            'acc_x': compute_accuracy(logit_x, label_x)[0].item(),
-            'loss_u': loss_u.item()
+            "loss_x": loss_x.item(),
+            "acc_x": compute_accuracy(logit_x, label_x)[0].item(),
+            "loss_u": loss_u.item(),
         }
 
         if (self.batch_idx + 1) == self.num_batches:
@@ -65,9 +65,9 @@ class SelfEnsembling(TrainerXU):
         return loss_summary
 
     def parse_batch_train(self, batch_x, batch_u):
-        input_x = batch_x['img'][0]
-        label_x = batch_x['label']
-        input_u = batch_u['img']
+        input_x = batch_x["img"][0]
+        label_x = batch_x["label"]
+        input_u = batch_u["img"]
         input_u1, input_u2 = input_u
 
         input_x = input_x.to(self.device)

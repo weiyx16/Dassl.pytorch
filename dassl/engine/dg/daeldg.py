@@ -40,14 +40,14 @@ class DAELDG(TrainerX):
         n_domain = cfg.DATALOADER.TRAIN_X.N_DOMAIN
         batch_size = cfg.DATALOADER.TRAIN_X.BATCH_SIZE
         if n_domain <= 0:
-            n_domain = self.dm.num_source_domains
+            n_domain = self.num_source_domains
         self.split_batch = batch_size // n_domain
         self.n_domain = n_domain
 
         self.conf_thre = cfg.TRAINER.DAEL.CONF_THRE
 
     def check_cfg(self, cfg):
-        assert cfg.DATALOADER.TRAIN_X.SAMPLER == 'RandomDomainSampler'
+        assert cfg.DATALOADER.TRAIN_X.SAMPLER == "RandomDomainSampler"
         assert len(cfg.TRAINER.DAEL.STRONG_TRANSFORMS) > 0
 
     def build_data_loader(self):
@@ -57,32 +57,34 @@ class DAELDG(TrainerX):
         choices = cfg.TRAINER.DAEL.STRONG_TRANSFORMS
         tfm_train_strong = build_transform(cfg, is_train=True, choices=choices)
         custom_tfm_train += [tfm_train_strong]
-        self.dm = DataManager(self.cfg, custom_tfm_train=custom_tfm_train)
-        self.train_loader_x = self.dm.train_loader_x
-        self.train_loader_u = self.dm.train_loader_u
-        self.val_loader = self.dm.val_loader
-        self.test_loader = self.dm.test_loader
-        self.num_classes = self.dm.num_classes
+        dm = DataManager(self.cfg, custom_tfm_train=custom_tfm_train)
+        self.train_loader_x = dm.train_loader_x
+        self.train_loader_u = dm.train_loader_u
+        self.val_loader = dm.val_loader
+        self.test_loader = dm.test_loader
+        self.num_classes = dm.num_classes
+        self.num_source_domains = dm.num_source_domains
+        self.lab2cname = dm.lab2cname
 
     def build_model(self):
         cfg = self.cfg
 
-        print('Building F')
+        print("Building F")
         self.F = SimpleNet(cfg, cfg.MODEL, 0)
         self.F.to(self.device)
-        print('# params: {:,}'.format(count_num_param(self.F)))
+        print("# params: {:,}".format(count_num_param(self.F)))
         self.optim_F = build_optimizer(self.F, cfg.OPTIM)
         self.sched_F = build_lr_scheduler(self.optim_F, cfg.OPTIM)
-        self.register_model('F', self.F, self.optim_F, self.sched_F)
+        self.register_model("F", self.F, self.optim_F, self.sched_F)
         fdim = self.F.fdim
 
-        print('Building E')
-        self.E = Experts(self.dm.num_source_domains, fdim, self.num_classes)
+        print("Building E")
+        self.E = Experts(self.num_source_domains, fdim, self.num_classes)
         self.E.to(self.device)
-        print('# params: {:,}'.format(count_num_param(self.E)))
+        print("# params: {:,}".format(count_num_param(self.E)))
         self.optim_E = build_optimizer(self.E, cfg.OPTIM)
         self.sched_E = build_lr_scheduler(self.optim_E, cfg.OPTIM)
-        self.register_model('E', self.E, self.optim_E, self.sched_E)
+        self.register_model("E", self.E, self.optim_E, self.sched_E)
 
     def forward_backward(self, batch):
         parsed_data = self.parse_batch_train(batch)
@@ -131,9 +133,9 @@ class DAELDG(TrainerX):
         self.model_backward_and_update(loss)
 
         loss_summary = {
-            'loss_x': loss_x.item(),
-            'acc': acc,
-            'loss_cr': loss_cr.item()
+            "loss_x": loss_x.item(),
+            "acc": acc,
+            "loss_cr": loss_cr.item()
         }
 
         if (self.batch_idx + 1) == self.num_batches:
@@ -142,10 +144,10 @@ class DAELDG(TrainerX):
         return loss_summary
 
     def parse_batch_train(self, batch):
-        input = batch['img']
-        input2 = batch['img2']
-        label = batch['label']
-        domain = batch['domain']
+        input = batch["img"]
+        input2 = batch["img2"]
+        label = batch["label"]
+        domain = batch["domain"]
 
         label = create_onehot(label, self.num_classes)
 
@@ -158,7 +160,7 @@ class DAELDG(TrainerX):
     def model_inference(self, input):
         f = self.F(input)
         p = []
-        for k in range(self.dm.num_source_domains):
+        for k in range(self.num_source_domains):
             p_k = self.E(k, f)
             p_k = p_k.unsqueeze(1)
             p.append(p_k)

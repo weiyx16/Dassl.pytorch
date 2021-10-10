@@ -9,12 +9,12 @@ from .build import BACKBONE_REGISTRY
 from .backbone import Backbone
 
 model_urls = {
-    'shufflenetv2_x0.5':
-    'https://download.pytorch.org/models/shufflenetv2_x0.5-f707e7126e.pth',
-    'shufflenetv2_x1.0':
-    'https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth',
-    'shufflenetv2_x1.5': None,
-    'shufflenetv2_x2.0': None,
+    "shufflenetv2_x0.5":
+    "https://download.pytorch.org/models/shufflenetv2_x0.5-f707e7126e.pth",
+    "shufflenetv2_x1.0":
+    "https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth",
+    "shufflenetv2_x1.5": None,
+    "shufflenetv2_x2.0": None,
 }
 
 
@@ -39,7 +39,7 @@ class InvertedResidual(nn.Module):
         super().__init__()
 
         if not (1 <= stride <= 3):
-            raise ValueError('illegal stride value')
+            raise ValueError("illegal stride value")
         self.stride = stride
 
         branch_features = oup // 2
@@ -70,7 +70,7 @@ class InvertedResidual(nn.Module):
                 kernel_size=1,
                 stride=1,
                 padding=0,
-                bias=False
+                bias=False,
             ),
             nn.BatchNorm2d(branch_features),
             nn.ReLU(inplace=True),
@@ -79,7 +79,7 @@ class InvertedResidual(nn.Module):
                 branch_features,
                 kernel_size=3,
                 stride=self.stride,
-                padding=1
+                padding=1,
             ),
             nn.BatchNorm2d(branch_features),
             nn.Conv2d(
@@ -88,7 +88,7 @@ class InvertedResidual(nn.Module):
                 kernel_size=1,
                 stride=1,
                 padding=0,
-                bias=False
+                bias=False,
             ),
             nn.BatchNorm2d(branch_features),
             nn.ReLU(inplace=True),
@@ -118,11 +118,11 @@ class ShuffleNetV2(Backbone):
         super().__init__()
         if len(stages_repeats) != 3:
             raise ValueError(
-                'expected stages_repeats as list of 3 positive ints'
+                "expected stages_repeats as list of 3 positive ints"
             )
         if len(stages_out_channels) != 5:
             raise ValueError(
-                'expected stages_out_channels as list of 5 positive ints'
+                "expected stages_out_channels as list of 5 positive ints"
             )
         self._stage_out_channels = stages_out_channels
 
@@ -137,7 +137,7 @@ class ShuffleNetV2(Backbone):
 
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        stage_names = ['stage{}'.format(i) for i in [2, 3, 4]]
+        stage_names = ["stage{}".format(i) for i in [2, 3, 4]]
         for name, repeats, output_channels in zip(
             stage_names, stages_repeats, self._stage_out_channels[1:]
         ):
@@ -176,13 +176,14 @@ class ShuffleNetV2(Backbone):
 
 def init_pretrained_weights(model, model_url):
     """Initializes model with pretrained weights.
-    
+
     Layers that don't match with pretrained layers in name or size are kept unchanged.
     """
     if model_url is None:
         import warnings
+
         warnings.warn(
-            'ImageNet pretrained weights are unavailable for this model'
+            "ImageNet pretrained weights are unavailable for this model"
         )
         return
     pretrain_dict = model_zoo.load_url(model_url)
@@ -200,7 +201,7 @@ def init_pretrained_weights(model, model_url):
 def shufflenet_v2_x0_5(pretrained=True, **kwargs):
     model = ShuffleNetV2([4, 8, 4], [24, 48, 96, 192, 1024], **kwargs)
     if pretrained:
-        init_pretrained_weights(model, model_urls['shufflenetv2_x0.5'])
+        init_pretrained_weights(model, model_urls["shufflenetv2_x0.5"])
     return model
 
 
@@ -208,7 +209,7 @@ def shufflenet_v2_x0_5(pretrained=True, **kwargs):
 def shufflenet_v2_x1_0(pretrained=True, **kwargs):
     model = ShuffleNetV2([4, 8, 4], [24, 116, 232, 464, 1024], **kwargs)
     if pretrained:
-        init_pretrained_weights(model, model_urls['shufflenetv2_x1.0'])
+        init_pretrained_weights(model, model_urls["shufflenetv2_x1.0"])
     return model
 
 
@@ -216,7 +217,7 @@ def shufflenet_v2_x1_0(pretrained=True, **kwargs):
 def shufflenet_v2_x1_5(pretrained=True, **kwargs):
     model = ShuffleNetV2([4, 8, 4], [24, 176, 352, 704, 1024], **kwargs)
     if pretrained:
-        init_pretrained_weights(model, model_urls['shufflenetv2_x1.5'])
+        init_pretrained_weights(model, model_urls["shufflenetv2_x1.5"])
     return model
 
 
@@ -224,5 +225,5 @@ def shufflenet_v2_x1_5(pretrained=True, **kwargs):
 def shufflenet_v2_x2_0(pretrained=True, **kwargs):
     model = ShuffleNetV2([4, 8, 4], [24, 244, 488, 976, 2048], **kwargs)
     if pretrained:
-        init_pretrained_weights(model, model_urls['shufflenetv2_x2.0'])
+        init_pretrained_weights(model, model_urls["shufflenetv2_x2.0"])
     return model

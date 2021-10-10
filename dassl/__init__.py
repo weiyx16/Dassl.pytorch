@@ -13,6 +13,6 @@ URL: https://github.com/KaiyangZhou/Dassl.pytorch
 }
 """
 
-__version__ = '0.4.2'
-__author__ = 'Kaiyang Zhou'
-__homepage__ = 'https://kaiyangzhou.github.io/'
+__version__ = "0.5.0"
+__author__ = "Kaiyang Zhou"
+__homepage__ = "https://kaiyangzhou.github.io/"

@@ -2,7 +2,7 @@ import torch
 from torch.nn import functional as F
 
 
-def cross_entropy(input, target, label_smooth=0, reduction='mean'):
+def cross_entropy(input, target, label_smooth=0, reduction="mean"):
     """Cross entropy loss.
 
     Args:
@@ -20,11 +20,11 @@ def cross_entropy(input, target, label_smooth=0, reduction='mean'):
     target = target.type_as(input)
     target = (1-label_smooth) * target + label_smooth/num_classes
     loss = (-target * log_prob).sum(1)
-    if reduction == 'mean':
+    if reduction == "mean":
         return loss.mean()
-    elif reduction == 'sum':
+    elif reduction == "sum":
         return loss.sum()
-    elif reduction == 'none':
+    elif reduction == "none":
         return loss
     else:
         raise ValueError
