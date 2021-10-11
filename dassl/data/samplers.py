@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import random
 from collections import defaultdict
+import torch.distributed as dist
 from torch.utils.data.sampler import Sampler, RandomSampler, SequentialSampler
 
 
@@ -188,6 +189,9 @@ def build_sampler(
 ):
     if sampler_type == "RandomSampler":
         return RandomSampler(data_source)
+    
+    if sampler_type == "DistributedSampler":
+        return torch.utils.data.DistributedSampler(data_source, num_replicas=dist.get_world_size(), rank=dist.get_rank(), shuffle=True)
 
     elif sampler_type == "SequentialSampler":
         return SequentialSampler(data_source)

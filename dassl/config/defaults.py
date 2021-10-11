@@ -16,6 +16,7 @@ _C.RESUME = ""
 # Set seed to positive value to use a fixed seed
 _C.SEED = -1
 _C.USE_CUDA = True
+_C.LOCAL_RANK = -1
 # Print detailed information
 # E.g. trainer, dataset, and backbone
 _C.VERBOSE = True

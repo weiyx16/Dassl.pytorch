@@ -5,7 +5,20 @@ import torch
 from sklearn.metrics import f1_score, confusion_matrix
 
 from .build import EVALUATOR_REGISTRY
+import torch.distributed as dist
 
+def reduce_tensor(tensor):
+    rt = tensor.clone()
+    dist.all_reduce(rt, op=dist.ReduceOp.SUM)
+    rt /= dist.get_world_size()
+    return rt
+
+def is_dist_avail_and_initialized():
+    if not dist.is_available():
+        return False
+    if not dist.is_initialized():
+        return False
+    return True
 
 class EvaluatorBase:
     """Base evaluator."""
@@ -48,6 +61,7 @@ class Classification(EvaluatorBase):
     def process(self, mo, gt):
         # mo (torch.Tensor): model output [batch, num_classes]
         # gt (torch.LongTensor): ground truth [batch]
+        self.device = gt.device
         pred = mo.max(1)[1]
         matches = pred.eq(gt).float()
         self._correct += int(matches.sum().item())
@@ -66,6 +80,10 @@ class Classification(EvaluatorBase):
         results = OrderedDict()
         acc = 100.0 * self._correct / self._total
         err = 100.0 - acc
+        
+        if is_dist_avail_and_initialized() and dist.get_world_size() > 1:
+            acc = reduce_tensor(torch.tensor(acc).to(self.device)).cpu().item()
+            err = 100.0 - acc
         macro_f1 = 100.0 * f1_score(
             self._y_true,
             self._y_pred,
