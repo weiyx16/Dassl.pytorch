@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import os
 import os.path as osp
 import datetime
 from collections import OrderedDict
@@ -17,6 +18,20 @@ from dassl.utils import (
 from dassl.modeling import build_head, build_backbone
 from dassl.evaluation import build_evaluator
 
+
+def setup_for_distributed(is_master):
+    """
+    This function disables printing when not in master process
+    """
+    import builtins as __builtin__
+    builtin_print = __builtin__.print
+
+    def print(*args, **kwargs):
+        force = kwargs.pop('force', False)
+        if is_master or force:
+            builtin_print(*args, **kwargs)
+
+    __builtin__.print = print
 
 class SimpleNet(nn.Module):
     """A simple neural network composed of a CNN backbone
@@ -316,6 +331,18 @@ class SimpleTrainer(TrainerBase):
             self.device = torch.device("cuda")
         else:
             self.device = torch.device("cpu")
+        ## DDP group init must locate before data_loader
+        if cfg.LOCAL_RANK != -1:
+            print("Warning! You are trying to use DDP here.")
+            os.environ['LOCAL_RANK'] = str(cfg.LOCAL_RANK)
+            torch.cuda.set_device(int(os.environ['LOCAL_RANK']))
+            print('| distributed init (rank {}): {}'.format(
+                int(os.environ["RANK"]), 'env://'), flush=True)
+            torch.distributed.init_process_group(backend='nccl', init_method='env://',
+                                                world_size=int(os.environ['WORLD_SIZE']), rank=int(os.environ["RANK"]))
+            print('Init DDP Successfully!')
+            setup_for_distributed(int(os.environ["RANK"]) == 0)
+            torch.distributed.barrier()
 
         # Save as attributes some frequently used variables
         self.start_epoch = self.epoch = 0

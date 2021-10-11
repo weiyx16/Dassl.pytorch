@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import random
 from collections import defaultdict
+import torch
 import torch.distributed as dist
 from torch.utils.data.sampler import Sampler, RandomSampler, SequentialSampler
 
