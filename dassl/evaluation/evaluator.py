@@ -119,14 +119,14 @@ class Classification(EvaluatorBase):
                 total = len(res)
                 acc = 100.0 * correct / total
                 accs.append(acc)
-                print(
-                    "* class: {} ({})\t"
-                    "total: {:,}\t"
-                    "correct: {:,}\t"
-                    "acc: {:.2f}%".format(
-                        label, classname, total, correct, acc
-                    )
-                )
+                # print(
+                #     "* class: {} ({})\t"
+                #     "total: {:,}\t"
+                #     "correct: {:,}\t"
+                #     "acc: {:.2f}%".format(
+                #         label, classname, total, correct, acc
+                #     )
+                # )
             mean_acc = np.mean(accs)
             print("* average: {:.2f}%".format(mean_acc))
 
