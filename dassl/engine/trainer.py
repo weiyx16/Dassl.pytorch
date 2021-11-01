@@ -177,8 +177,8 @@ class TrainerBase:
                     is_best=is_best,
                     model_name=model_name,
                 )
-             if is_dist_avail_and_initialized():
-                 torch.distributed.barrier()
+            if is_dist_avail_and_initialized():
+                torch.distributed.barrier()
 
 
     def resume_model_if_exist(self, directory):
