@@ -6,6 +6,7 @@ import datetime
 from collections import OrderedDict
 import torch
 import torch.nn as nn
+import torch.distributed as dist
 from torch.utils.tensorboard import SummaryWriter
 
 from dassl.data import DataManager
@@ -18,6 +19,27 @@ from dassl.utils import (
 from dassl.modeling import build_head, build_backbone
 from dassl.evaluation import build_evaluator
 
+def is_dist_avail_and_initialized():
+    if not dist.is_available():
+        return False
+    if not dist.is_initialized():
+        return False
+    return True
+
+
+def get_rank():
+    if not is_dist_avail_and_initialized():
+        return 0
+    return dist.get_rank()
+
+
+def is_main_process():
+    return get_rank() == 0
+
+
+def save_on_master(*args, **kwargs):
+    if is_main_process():
+        torch.save(*args, **kwargs)
 
 def setup_for_distributed(is_master):
     """
@@ -143,17 +165,21 @@ class TrainerBase:
             if self._scheds[name] is not None:
                 sched_dict = self._scheds[name].state_dict()
 
-            save_checkpoint(
-                {
-                    "state_dict": model_dict,
-                    "epoch": epoch + 1,
-                    "optimizer": optim_dict,
-                    "scheduler": sched_dict,
-                },
-                osp.join(directory, name),
-                is_best=is_best,
-                model_name=model_name,
-            )
+            if is_main_process():
+                save_checkpoint(
+                    {
+                        "state_dict": model_dict,
+                        "epoch": epoch + 1,
+                        "optimizer": optim_dict,
+                        "scheduler": sched_dict,
+                    },
+                    osp.join(directory, name),
+                    is_best=is_best,
+                    model_name=model_name,
+                )
+             if is_dist_avail_and_initialized():
+                 torch.distributed.barrier()
+
 
     def resume_model_if_exist(self, directory):
         names = self.get_model_names()
