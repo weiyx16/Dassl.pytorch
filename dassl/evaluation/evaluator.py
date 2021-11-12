@@ -154,7 +154,7 @@ class Classification(EvaluatorBase):
             results["accuracy"] = acc
             print(
                 "=> result\n"
-                f"* accuracy: {acc:.2f}"
+                f"* accuracy: {acc:.2f}%"
             )
         if self._per_class_res is not None:
             labels = list(self._per_class_res.keys())
