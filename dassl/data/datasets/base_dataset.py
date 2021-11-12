@@ -101,7 +101,11 @@ class DatasetBase:
         """
         label_set = set()
         for item in data_source:
-            label_set.add(item.label)
+            if not isinstance(item.label, list):
+                label_set.add(item.label)
+            else:
+                for l in item.label:
+                    label_set.add(l)
         return max(label_set) + 1
 
     def get_lab2cname(self, data_source):
@@ -112,7 +116,11 @@ class DatasetBase:
         """
         container = set()
         for item in data_source:
-            container.add((item.label, item.classname))
+            if not isinstance(item.label, list):
+                container.add((item.label, item.classname))
+            else:
+                for l, n in zip(item.label, item.classname):
+                    container.add((l, n))
         mapping = {label: classname for label, classname in container}
         labels = list(mapping.keys())
         labels.sort()
@@ -189,6 +197,8 @@ class DatasetBase:
                     else:
                         sampled_items = items
                 dataset.extend(sampled_items)
+            # add this for voc-like multi-label datasets
+            dataset = list(set(dataset))
 
             output.append(dataset)
 

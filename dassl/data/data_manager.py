@@ -331,9 +331,21 @@ class DatasetWrapper(TorchDataset):
 
     def __getitem__(self, idx):
         item = self.data_source[idx]
-
+        if isinstance(item.label, list):
+            if self.is_train:
+                ohlabel = [0] * 20 # hack for voc now:
+                for l in item.label:
+                    ohlabel[l] = 1
+                if sum(ohlabel) == 0:
+                    print(item.label)
+            else:
+                ohlabel = [-1] * 20 # hack for voc now:
+                for l in item.label:
+                    ohlabel[l] = 1
+                for l in item.ignore_class:
+                    ohlabel[l] = 0
         output = {
-            "label": item.label,
+            "label": item.label if not isinstance(item.label, list) else ohlabel,
             "domain": item.domain,
             "impath": item.impath
         }
